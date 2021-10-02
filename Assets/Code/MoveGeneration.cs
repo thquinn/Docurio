@@ -76,8 +76,11 @@ namespace Assets.Code {
                     // Check for other pieces in the space.
                     Int3 space = new Int3(x, y, z);
                     if (!state.Is(space, DocurioEntity.Empty)) {
+                        if ((state.Get(from) | DocurioEntity.White) != (state.Get(space) | DocurioEntity.White)) {
+                            // Capture.
+                            moves.Add(new DocurioMove(from, space));
+                        }
                         break;
-                        // TODO: Capture.
                     }
                     // Add move.
                     moves.Add(new DocurioMove(from, space));

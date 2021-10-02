@@ -11,7 +11,7 @@ namespace Assets.Code {
 
         public int xSize, ySize, zSize;
         public DocurioEntity[,,] board;
-        public bool whiteToPlay = true;
+        public int toPlay;
 
         public DocurioState(int size) {
             xSize = size;
@@ -28,12 +28,13 @@ namespace Assets.Code {
                             kingPlaced = true;
                         } else if (UnityEngine.Random.value < .25f) {
                             board[x, y, 1] = DocurioEntity.Block;
-                        } else if (UnityEngine.Random.value < .2f) {
-                            board[x, y, 1] = DocurioEntity.Pusher | DocurioEntity.White;
+                        } else if (UnityEngine.Random.value < .3f) {
+                            board[x, y, 1] = DocurioEntity.Pusher | (UnityEngine.Random.value < .5f ? DocurioEntity.White : DocurioEntity.Black);
                         }
                     }
                 }
             }
+            toPlay = 0;
         }
 
         public DocurioEntity Get(Int3 coor) {
@@ -58,10 +59,10 @@ namespace Assets.Code {
         }
 
         public void Execute(DocurioMove move, List<Tuple<Int3, Int3>> slides = null, List<Int3> destroyedUnits = null) {
-            whiteToPlay = !whiteToPlay;
+            toPlay = (toPlay + 1) % 2;
             Int3 from = move.from, to = move.to;
             Int2 pushDirection = move.pushDirection;
-            if (destroyedUnits != null && !Is(to, DocurioEntity.Empty)) {
+            if (destroyedUnits != null && from != to && !Is(to, DocurioEntity.Empty)) {
                 destroyedUnits.Add(to);
             }
             MoveEntity(from, to);
@@ -95,6 +96,7 @@ namespace Assets.Code {
                     }
                     destX = nextDestX;
                     destY = nextDestY;
+                    destZ = GroundZ(destX, destY);
                 }
                 // Perform the actual pushes.
                 int pushX = to.x;

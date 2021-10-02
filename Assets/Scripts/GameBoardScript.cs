@@ -14,6 +14,7 @@ public class GameBoardScript : MonoBehaviour
     GameObject[,] tileObjects;
     GameObject[,,] entityObjects;
     // Unit and move selection.
+    bool[] aiControl;
     Dictionary<Collider, DocurioMove> selectMoveObjects = new Dictionary<Collider, DocurioMove>();
 
     void Start() {
@@ -29,6 +30,9 @@ public class GameBoardScript : MonoBehaviour
                 tile.transform.localPosition = new Vector3(x, 0, y);
                 tileObjects[x, y] = tile;
                 for (int z = 0; z < state.zSize; z++) {
+                    if (state.Is(x, y, z, DocurioEntity.Empty)) {
+                        break;
+                    }
                     GameObject entity;
                     if (state.board[x, y, z] == DocurioEntity.Block) {
                         entity = Instantiate(blockPrefab, transform);
@@ -38,16 +42,23 @@ public class GameBoardScript : MonoBehaviour
                         entity = Instantiate(unitPrefab, transform);
                         entity.GetComponent<EntityScript>().BecomePusher();
                     } else {
-                        break;
+                        throw new Exception("Unknown piece type.");
+                    }
+                    if (state.Is(x, y, z, DocurioEntity.Black)) {
+                        entity.GetComponent<EntityScript>().BecomeBlack();
                     }
                     entity.transform.localPosition = new Vector3(x, entityHeight * z, y);
                     entityObjects[x, y, z] = entity;
                 }
             }
         }
+        aiControl = new bool[] { false, false };
     }
 
     void Update() {
+        if (aiControl[state.toPlay]) {
+            return;
+        }
         if (!UpdateSelectMove()) {
             UpdateSelectUnit();
         }
@@ -70,6 +81,10 @@ public class GameBoardScript : MonoBehaviour
         List<Tuple<Int3, Int3>> slides = new List<Tuple<Int3, Int3>>();
         List<Int3> destroyedUnits = new List<Int3>();
         state.Execute(move, slides, destroyedUnits);
+        foreach (Int3 d in destroyedUnits) {
+            Destroy(entityObjects[d.x, d.y, d.z]); // TODO: VFX
+            entityObjects[d.x, d.y, d.z] = null;
+        }
         GameObject unit = entityObjects[move.from.x, move.from.y, move.from.z];
         EntityScript unitScript = unit.GetComponent<EntityScript>();
         if (move.from != move.to) {
@@ -85,7 +100,6 @@ public class GameBoardScript : MonoBehaviour
             scriptToSlide.Add(slidEntity.GetComponent<EntityScript>(), slide);
         }
         unitScript.AnimatePushes(move.to, scriptToSlide);
-        // TODO: Captures.
     }
     void UpdateSelectUnit() {
         if (!Input.GetMouseButtonDown(0)) {
@@ -97,6 +111,10 @@ public class GameBoardScript : MonoBehaviour
             return;
         }
         Int3 from = Util.FindIndex3(entityObjects, collider.gameObject);
+        DocurioEntity color = state.toPlay == 0 ? DocurioEntity.White : DocurioEntity.Black;
+        if (!state.Is(from, color)) {
+            return;
+        }
         List<DocurioMove> moves = new List<DocurioMove>();
         state.AddMoves(moves, from);
         foreach (DocurioMove move in moves) {

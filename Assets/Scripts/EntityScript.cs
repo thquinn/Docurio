@@ -6,6 +6,7 @@ using UnityEngine;
 
 public class EntityScript : MonoBehaviour
 {
+    public Material blackMaterial;
     public MeshFilter meshFilter;
     public GameObject prefabPusherAnim;
 
@@ -14,6 +15,11 @@ public class EntityScript : MonoBehaviour
     public void BecomePusher() {
         Destroy(meshFilter.gameObject);
         Instantiate(prefabPusherAnim, transform);
+    }
+    public void BecomeBlack() {
+        foreach (MeshRenderer mr in GetComponentsInChildren<MeshRenderer>()) {
+            mr.material = blackMaterial;
+        }
     }
 
     void Update() {
@@ -163,7 +169,7 @@ class UnitSlideAnimation : UnitAnimation {
         int dx = to.x - from.x;
         int dy = to.y - from.y;
         int distance = Mathf.Max(Mathf.Abs(dx), Mathf.Abs(dy));
-        totalFrames = 100; // TODO
+        totalFrames = Mathf.RoundToInt(100 * Mathf.Sqrt(distance));
     }
 
     public override Vector3 Tick() {
@@ -175,7 +181,7 @@ class UnitSlideAnimation : UnitAnimation {
 }
 
 class UnitGravityAnimation : UnitAnimation {
-    static Vector3 GRAVITY = new Vector3(0, -.0005f, 0);
+    static Vector3 GRAVITY = new Vector3(0, -.00025f, 0);
     Vector3 speed;
 
     public UnitGravityAnimation(Int3 from, Int3 to) : base(from, to) {

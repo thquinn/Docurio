@@ -137,6 +137,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 19b2a74f10e5b6f4cab13f9818b32b56, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  blackMaterial: {fileID: 2100000, guid: fcaa9f6b91374df4aac2b4cb5121e8ba, type: 2}
   meshFilter: {fileID: 2145269581339152887}
   prefabPusherAnim: {fileID: 2147502138393277544, guid: 2c6c30a2237c5224cbc3b8a739cab3e9,
     type: 3}
