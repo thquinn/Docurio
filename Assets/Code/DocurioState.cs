@@ -23,6 +23,8 @@ namespace Assets.Code {
                             kingPlaced = true;
                         } else if (UnityEngine.Random.value < .25f) {
                             board[x, y, 1] = DocurioEntity.Block;
+                        } else if (UnityEngine.Random.value < .1f) {
+                            board[x, y, 1] = DocurioEntity.Pusher | DocurioEntity.White;
                         }
                     }
                 }
@@ -33,6 +35,9 @@ namespace Assets.Code {
             return board[coor.x, coor.y, coor.z];
         }
         public bool Is(int x, int y, int z, DocurioEntity type) {
+            if (type == DocurioEntity.Empty) {
+                return board[x, y, z] == DocurioEntity.Empty;
+            }
             return (board[x, y, z] & type) != 0;
         }
         public bool Is(Int3 coor, DocurioEntity type) {
@@ -53,6 +58,7 @@ namespace Assets.Code {
         White = 2,
         Black = 2 << 1,
         King = 2 << 2,
+        Pusher = 2 << 3,
     }
 
     public struct DocurioMove {

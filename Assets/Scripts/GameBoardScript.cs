@@ -33,6 +33,9 @@ public class GameBoardScript : MonoBehaviour
                         entity = Instantiate(blockPrefab, transform);
                     } else if (state.Is(x, y, z, DocurioEntity.King)) {
                         entity = Instantiate(unitPrefab, transform);
+                    } else if (state.Is(x, y, z, DocurioEntity.Pusher)) {
+                        entity = Instantiate(unitPrefab, transform);
+                        entity.GetComponent<UnitScript>().BecomePusher();
                     } else {
                         break;
                     }

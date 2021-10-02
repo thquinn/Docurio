@@ -5,7 +5,15 @@ using UnityEngine;
 
 public class UnitScript : MonoBehaviour
 {
+    public MeshFilter meshFilter;
+    public GameObject prefabPusherAnim;
+
     Queue<UnitAnimation> animations = new Queue<UnitAnimation>();
+
+    public void BecomePusher() {
+        Destroy(meshFilter.gameObject);
+        Instantiate(prefabPusherAnim, transform);
+    }
 
     void Update() {
         if (animations.Count == 0) {
@@ -68,7 +76,7 @@ abstract class UnitAnimation {
 }
 
 class UnitRunAnimation : UnitAnimation {
-    static float RUN_SPEED = .01f; 
+    static float RUN_SPEED = .0066f;
 
     public UnitRunAnimation(Int3 from, Int3 to) : base(from, to) {
         int dx = to.x - from.x;
@@ -87,7 +95,7 @@ class UnitRunAnimation : UnitAnimation {
 }
 
 class UnitDropAnimation : UnitAnimation {
-    static float FALL_SPEED = .01f;
+    static float FALL_SPEED = .0066f;
 
     public UnitDropAnimation(Int3 from, Int3 to) : base(from, to) {
         int distance = from.z - to.z;
@@ -105,7 +113,7 @@ class UnitDropAnimation : UnitAnimation {
 }
 
 class UnitJumpAnimation : UnitAnimation {
-    static float FALL_SPEED = .01f;
+    static float FALL_SPEED = .0066f;
 
     public UnitJumpAnimation(Int3 from, Int3 to) : base(from, to) {
         int distance = to.z - from.z;

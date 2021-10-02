@@ -13,7 +13,9 @@ namespace Assets.Code {
         public static void AddMoves(this DocurioState state, List<DocurioMove> moves, Int3 from) {
             DocurioEntity piece = state.Get(from);
             if ((piece & DocurioEntity.King) > 0) {
-                AddCompassMoves(state, moves, from, true, true, true);
+                AddCompassMoves(state, moves, from, true, false, false);
+            } else if ((piece & DocurioEntity.Pusher) > 0) {
+                AddCompassMoves(state, moves, from, false, true, true);
             } else {
                 throw new Exception("Could not find piece at " + from);
             }
@@ -49,8 +51,14 @@ namespace Assets.Code {
                         // You can't descend and ascend in the same move.
                         climbLeftInThisDirection = false;
                     }
+                    Int3 space = new Int3(x, y, z);
+                    // Check for other pieces in the space.
+                    if (!state.Is(space, DocurioEntity.Empty)) {
+                        break;
+                        // TODO: Capture.
+                    }
                     // Add move.
-                    moves.Add(new DocurioMove(from, new Int3(x, y, z)));
+                    moves.Add(new DocurioMove(from, space));
                     if (!anyDistance) {
                         break;
                     }
@@ -65,7 +73,6 @@ namespace Assets.Code {
                     x += direction.x;
                     y += direction.y;
                     lastZ = z;
-                    // TODO: Capture.
                 }
             }
         }
