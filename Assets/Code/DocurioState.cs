@@ -18,7 +18,7 @@ namespace Assets.Code {
                 for (int y = 0; y < size; y++) {
                     if (UnityEngine.Random.value < .5f) {
                         board[x, y, 0] = DocurioEntity.Block;
-                        if (!kingPlaced && UnityEngine.Random.value < .1f) {
+                        if (!kingPlaced && UnityEngine.Random.value < .25f) {
                             board[x, y, 1] = DocurioEntity.King | DocurioEntity.White;
                             kingPlaced = true;
                         } else if (UnityEngine.Random.value < .25f) {

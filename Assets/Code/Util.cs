@@ -7,6 +7,13 @@ using UnityEngine;
 
 namespace Assets.Code {
     class Util {
+        public static int SignFixed(int n) {
+            if (n == 0) {
+                return 0;
+            }
+            return n < 0 ? -1 : 1;
+        }
+
         public static Int3 FindIndex3(object[,,] arr, object o) {
             for (int x = 0; x < arr.GetLength(0); x++) {
                 for (int y = 0; y < arr.GetLength(1); y++) {
@@ -58,5 +65,20 @@ namespace Assets.Code {
         public override string ToString() {
             return string.Format("({0}, {1}, {2})", x, y, z);
         }
+
+        public override int GetHashCode() {
+            return x ^ y ^ z;
+        }
+        public override bool Equals(object obj) {
+            if (!(obj is Int3)) {
+                return false;
+            }
+            Int3 other = (Int3) obj;
+            return x == other.x && y == other.y && z == other.z;
+        }
+        public static bool operator ==(Int3 a, Int3 b) {
+            return a.x == b.x && a.y == b.y && a.z == b.z;
+        }
+        public static bool operator !=(Int3 a, Int3 b) => !(a == b);
     }
 }

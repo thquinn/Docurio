@@ -160,7 +160,7 @@ Light:
     m_Type: 2
     m_Resolution: -1
     m_CustomResolution: -1
-    m_Strength: 1
+    m_Strength: 0.5
     m_Bias: 0.05
     m_NormalBias: 0.4
     m_NearPlane: 0.2
@@ -356,7 +356,7 @@ MonoBehaviour:
     m_Bits: 256
   layerMaskMove:
     serializedVersion: 2
-    m_Bits: 512
+    m_Bits: 1536
 --- !u!4 &1517261122
 Transform:
   m_ObjectHideFlags: 0
