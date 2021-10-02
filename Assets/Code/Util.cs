@@ -40,6 +40,7 @@ namespace Assets.Code {
     }
 
     public struct Int2 {
+        public static Int2 None = new Int2(-1, -1);
         public int x, y;
 
         public Int2(int x, int y) {
@@ -47,9 +48,28 @@ namespace Assets.Code {
             this.y = y;
         }
 
+        public bool IsZero() {
+            return x == 0 && y == 0;
+        }
+
         public override string ToString() {
             return string.Format("({0}, {1})", x, y);
         }
+
+        public override int GetHashCode() {
+            return x ^ y;
+        }
+        public override bool Equals(object obj) {
+            if (!(obj is Int2)) {
+                return false;
+            }
+            Int2 other = (Int2)obj;
+            return x == other.x && y == other.y;
+        }
+        public static bool operator ==(Int2 a, Int2 b) {
+            return a.x == b.x && a.y == b.y;
+        }
+        public static bool operator !=(Int2 a, Int2 b) => !(a == b);
     }
 
     public struct Int3 {

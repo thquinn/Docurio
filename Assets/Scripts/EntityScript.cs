@@ -1,9 +1,10 @@
 ﻿using Assets.Code;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class UnitScript : MonoBehaviour
+public class EntityScript : MonoBehaviour
 {
     public MeshFilter meshFilter;
     public GameObject prefabPusherAnim;
@@ -55,6 +56,17 @@ public class UnitScript : MonoBehaviour
         Int3 end = new Int3(x, y, z);
         if (end != runStart) {
             animations.Enqueue(new UnitRunAnimation(runStart, end));
+        }
+    }
+    public void AnimatePushes(Int3 loc, Dictionary<EntityScript, Tuple<Int3, Int3>> slides) {
+        animations.Enqueue(new UnitPushAnimation(loc, slides));
+    }
+    public void AnimateSlideAndDrop(Tuple<Int3, Int3> slide) {
+        Int3 beforeDrop = slide.Item2;
+        beforeDrop.z = slide.Item1.z;
+        animations.Enqueue(new UnitSlideAnimation(slide.Item1, beforeDrop));
+        if (slide.Item1.z != slide.Item2.z) {
+            animations.Enqueue(new UnitGravityAnimation(beforeDrop, slide.Item2));
         }
     }
 }
@@ -127,5 +139,57 @@ class UnitJumpAnimation : UnitAnimation {
         float y = EasingFunction.EaseOutBack(from.y, to.y, t);
         float z = Mathf.Lerp(from.z, to.z, t);
         return new Vector3(x, y, z);
+    }
+}
+
+class UnitPushAnimation : UnitAnimation {
+    Dictionary<EntityScript, Tuple<Int3, Int3>> slides;
+
+    public UnitPushAnimation(Int3 loc, Dictionary<EntityScript, Tuple<Int3, Int3>> slides) : base(loc, loc) {
+        totalFrames = 0;
+        this.slides = slides;
+    }
+
+    public override Vector3 Tick() {
+        foreach (var kvp in slides) {
+            kvp.Key.AnimateSlideAndDrop(kvp.Value);
+        }
+        return to;
+    }
+}
+
+class UnitSlideAnimation : UnitAnimation {
+    public UnitSlideAnimation(Int3 from, Int3 to) : base(from, to) {
+        int dx = to.x - from.x;
+        int dy = to.y - from.y;
+        int distance = Mathf.Max(Mathf.Abs(dx), Mathf.Abs(dy));
+        totalFrames = 100; // TODO
+    }
+
+    public override Vector3 Tick() {
+        frame++;
+        float t = frame / (float)totalFrames;
+        t = EasingFunction.EaseOutQuad(0, 1, t);
+        return Vector3.Lerp(from, to, t);
+    }
+}
+
+class UnitGravityAnimation : UnitAnimation {
+    static Vector3 GRAVITY = new Vector3(0, -.0005f, 0);
+    Vector3 speed;
+
+    public UnitGravityAnimation(Int3 from, Int3 to) : base(from, to) {
+        totalFrames = 999;
+        speed = Vector3.zero;
+    }
+
+    public override Vector3 Tick() {
+        speed += GRAVITY;
+        from += speed;
+        if (from.y <= to.y) {
+            from.y = to.y;
+            totalFrames = 0;
+        }
+        return from;
     }
 }

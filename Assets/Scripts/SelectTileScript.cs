@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class SelectTileScript : MonoBehaviour
 {
+    public static float FADE_RATE = .0066f;
+
     public SpriteRenderer spriteRenderer;
 
     Vector3 targetPos;
@@ -19,7 +21,7 @@ public class SelectTileScript : MonoBehaviour
     void Update() {
         spriteRenderer.transform.localPosition = Vector3.Lerp(spriteRenderer.transform.localPosition, targetPos, .04f);
         Color c = spriteRenderer.color;
-        c.a += .0066f;
+        c.a += FADE_RATE;
         spriteRenderer.color = c;
         if (c.a >= 1) {
             Destroy(this);

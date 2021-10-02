@@ -351,6 +351,8 @@ MonoBehaviour:
     type: 3}
   selectTilePrefab: {fileID: 5835608944551060582, guid: e52d6b060d63b10409437ca095294348,
     type: 3}
+  selectBlockPrefab: {fileID: 6470192191040034354, guid: 0dc46e36dbddb9f4f85b4a1287cd2db6,
+    type: 3}
   layerMaskSwitch:
     serializedVersion: 2
     m_Bits: 256
