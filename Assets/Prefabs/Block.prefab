@@ -44,6 +44,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 19b2a74f10e5b6f4cab13f9818b32b56, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  blackMaterial: {fileID: 0}
   meshFilter: {fileID: 2506298839761859508}
   prefabPusherAnim: {fileID: 2147502138393277544, guid: 2c6c30a2237c5224cbc3b8a739cab3e9,
     type: 3}
@@ -106,7 +107,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: -3033667219593020291, guid: 6ef9591c34f141e4e95545d4dd833f39, type: 3}
+  - {fileID: 2100000, guid: 51460fbc20a35ef45b3a40487fcc3354, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0

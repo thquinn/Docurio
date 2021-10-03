@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class PusherIdleAnimScript : MonoBehaviour {
     static Vector3[] POSITIONS = new Vector3[] { new Vector3(.5f, .5f, -.5f), new Vector3(.5f, 1.5f, -.5f), new Vector3(.5f, 1.5f, .5f), new Vector3(-.5f, 1.5f, .5f), new Vector3(-.5f, 1.5f, -.5f), new Vector3(-.5f, .5f, -.5f), new Vector3(-.5f, .5f, .5f), new Vector3(.5f, .5f, .5f) };
-    static float SPEED = .02f;
+    static float SPEED = .1f;
     static float CLOSE_ENOUGH = .01f;
 
     public Transform[] cubes;

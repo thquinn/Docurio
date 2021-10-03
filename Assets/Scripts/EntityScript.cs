@@ -33,6 +33,10 @@ public class EntityScript : MonoBehaviour
         }
     }
 
+    public bool IsAnimating() {
+        return animations.Count > 0;
+    }
+
     public void AnimateLinearMove(DocurioState state, DocurioMove move) {
         int x = move.from.x;
         int y = move.from.y;
@@ -94,7 +98,7 @@ abstract class UnitAnimation {
 }
 
 class UnitRunAnimation : UnitAnimation {
-    static float RUN_SPEED = .0066f;
+    static float RUN_SPEED = .066f;
 
     public UnitRunAnimation(Int3 from, Int3 to) : base(from, to) {
         int dx = to.x - from.x;
@@ -113,7 +117,7 @@ class UnitRunAnimation : UnitAnimation {
 }
 
 class UnitDropAnimation : UnitAnimation {
-    static float FALL_SPEED = .0066f;
+    static float FALL_SPEED = .066f;
 
     public UnitDropAnimation(Int3 from, Int3 to) : base(from, to) {
         int distance = from.z - to.z;
@@ -131,11 +135,11 @@ class UnitDropAnimation : UnitAnimation {
 }
 
 class UnitJumpAnimation : UnitAnimation {
-    static float FALL_SPEED = .0066f;
+    static float JUMP_SPEED = .066f;
 
     public UnitJumpAnimation(Int3 from, Int3 to) : base(from, to) {
         int distance = to.z - from.z;
-        totalFrames = Mathf.RoundToInt(Mathf.Sqrt(distance) / FALL_SPEED);
+        totalFrames = Mathf.RoundToInt(Mathf.Sqrt(distance) / JUMP_SPEED);
     }
 
     public override Vector3 Tick() {
@@ -169,7 +173,7 @@ class UnitSlideAnimation : UnitAnimation {
         int dx = to.x - from.x;
         int dy = to.y - from.y;
         int distance = Mathf.Max(Mathf.Abs(dx), Mathf.Abs(dy));
-        totalFrames = Mathf.RoundToInt(100 * Mathf.Sqrt(distance));
+        totalFrames = Mathf.RoundToInt(15 * Mathf.Sqrt(distance));
     }
 
     public override Vector3 Tick() {
@@ -181,7 +185,7 @@ class UnitSlideAnimation : UnitAnimation {
 }
 
 class UnitGravityAnimation : UnitAnimation {
-    static Vector3 GRAVITY = new Vector3(0, -.00025f, 0);
+    static Vector3 GRAVITY = new Vector3(0, -.01f, 0);
     Vector3 speed;
 
     public UnitGravityAnimation(Int3 from, Int3 to) : base(from, to) {

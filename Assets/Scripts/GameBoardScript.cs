@@ -1,6 +1,5 @@
 ﻿using Assets.Code;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -8,11 +7,12 @@ public class GameBoardScript : MonoBehaviour
 {
     public GameObject tilePrefab, blockPrefab, unitPrefab, selectTilePrefab, selectBlockPrefab;
     public LayerMask layerMaskSwitch, layerMaskMove;
+    public TextAsset levelText;
     public static float entityHeight;
 
     DocurioState state;
     GameObject[,] tileObjects;
-    GameObject[,,] entityObjects;
+    EntityScript[,,] entityScripts;
     // Unit and move selection.
     bool[] aiControl;
     Dictionary<Collider, DocurioMove> selectMoveObjects = new Dictionary<Collider, DocurioMove>();
@@ -20,9 +20,9 @@ public class GameBoardScript : MonoBehaviour
     void Start() {
         int size = 7;
         transform.localPosition = new Vector3((size - 1) / -2, 0, (size - 1) / -2);
-        state = new DocurioState(size);
+        state = new DocurioState(levelText);
         tileObjects = new GameObject[size, size];
-        entityObjects = new GameObject[size, size, state.zSize];
+        entityScripts = new EntityScript[size, size, state.zSize];
         entityHeight = blockPrefab.transform.localScale.y;
         for (int x = 0; x < size; x++) {
             for (int y = 0; y < size; y++) {
@@ -44,24 +44,49 @@ public class GameBoardScript : MonoBehaviour
                     } else {
                         throw new Exception("Unknown piece type.");
                     }
+                    EntityScript script = entity.GetComponent<EntityScript>();
                     if (state.Is(x, y, z, DocurioEntity.Black)) {
                         entity.GetComponent<EntityScript>().BecomeBlack();
                     }
                     entity.transform.localPosition = new Vector3(x, entityHeight * z, y);
-                    entityObjects[x, y, z] = entity;
+                    entityScripts[x, y, z] = script;
                 }
             }
         }
-        aiControl = new bool[] { false, false };
+        aiControl = new bool[] { true, true };
     }
 
     void Update() {
+        if (state.win > -1) {
+            return;
+        }
         if (aiControl[state.toPlay]) {
+            if (AI.status == AIStatus.Ready) {
+                AI.Start(state, 10000);
+            } else if (!IsAnimating() && AI.status == AIStatus.Done) {
+                ExecuteMove(AI.move);
+                AI.status = AIStatus.Ready;
+            }
+            return;
+        }
+        if (IsAnimating()) {
             return;
         }
         if (!UpdateSelectMove()) {
             UpdateSelectUnit();
         }
+    }
+    bool IsAnimating() {
+        for (int x = 0; x < state.xSize; x++) {
+            for (int y = 0; y < state.ySize; y++) {
+                for (int z = 0; z < state.zSize; z++) {
+                    if (entityScripts[x, y, z] != null && entityScripts[x, y, z].IsAnimating()) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     bool UpdateSelectMove() {
@@ -82,22 +107,21 @@ public class GameBoardScript : MonoBehaviour
         List<Int3> destroyedUnits = new List<Int3>();
         state.Execute(move, slides, destroyedUnits);
         foreach (Int3 d in destroyedUnits) {
-            Destroy(entityObjects[d.x, d.y, d.z]); // TODO: VFX
-            entityObjects[d.x, d.y, d.z] = null;
+            Destroy(entityScripts[d.x, d.y, d.z].gameObject); // TODO: VFX
+            entityScripts[d.x, d.y, d.z] = null;
         }
-        GameObject unit = entityObjects[move.from.x, move.from.y, move.from.z];
-        EntityScript unitScript = unit.GetComponent<EntityScript>();
+        EntityScript unitScript = entityScripts[move.from.x, move.from.y, move.from.z];
         if (move.from != move.to) {
-            entityObjects[move.to.x, move.to.y, move.to.z] = unit;
-            entityObjects[move.from.x, move.from.y, move.from.z] = null;
+            entityScripts[move.to.x, move.to.y, move.to.z] = unitScript;
+            entityScripts[move.from.x, move.from.y, move.from.z] = null;
             unitScript.AnimateLinearMove(state, move);
         }
         Dictionary<EntityScript, Tuple<Int3, Int3>> scriptToSlide = new Dictionary<EntityScript, Tuple<Int3, Int3>>();
         foreach (Tuple<Int3, Int3> slide in slides) {
-            GameObject slidEntity = entityObjects[slide.Item1.x, slide.Item1.y, slide.Item1.z];
-            entityObjects[slide.Item2.x, slide.Item2.y, slide.Item2.z] = slidEntity;
-            entityObjects[slide.Item1.x, slide.Item1.y, slide.Item1.z] = null;
-            scriptToSlide.Add(slidEntity.GetComponent<EntityScript>(), slide);
+            EntityScript slidScript = entityScripts[slide.Item1.x, slide.Item1.y, slide.Item1.z];
+            entityScripts[slide.Item2.x, slide.Item2.y, slide.Item2.z] = slidScript;
+            entityScripts[slide.Item1.x, slide.Item1.y, slide.Item1.z] = null;
+            scriptToSlide.Add(slidScript, slide);
         }
         unitScript.AnimatePushes(move.to, scriptToSlide);
     }
@@ -110,7 +134,7 @@ public class GameBoardScript : MonoBehaviour
         if (collider == null) {
             return;
         }
-        Int3 from = Util.FindIndex3(entityObjects, collider.gameObject);
+        Int3 from = Util.FindIndex3(entityScripts, collider.GetComponent<EntityScript>());
         DocurioEntity color = state.toPlay == 0 ? DocurioEntity.White : DocurioEntity.Black;
         if (!state.Is(from, color)) {
             return;

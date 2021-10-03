@@ -2,39 +2,75 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using UnityEngine;
 
 namespace Assets.Code {
     public class DocurioState {
-        static int MAX_HEIGHT = 3;
+        static readonly Dictionary<char, DocurioEntity> CHAR_TO_PIECE = new Dictionary<char, DocurioEntity>() {
+            { 'K', DocurioEntity.White | DocurioEntity.King },
+            { 'k', DocurioEntity.Black | DocurioEntity.King },
+            { 'P', DocurioEntity.White | DocurioEntity.Pusher },
+            { 'p', DocurioEntity.Black | DocurioEntity.Pusher },
+        };
 
         public int xSize, ySize, zSize;
         public DocurioEntity[,,] board;
-        public int toPlay;
+        public int toPlay, whitePieces, blackPieces, win, moves;
 
-        public DocurioState(int size) {
-            xSize = size;
-            ySize = size;
-            zSize = MAX_HEIGHT;
-            bool kingPlaced = false;
-            board = new DocurioEntity[size, size, MAX_HEIGHT];
-            for (int x = 0; x < size; x++) {
-                for (int y = 0; y < size; y++) {
-                    if (UnityEngine.Random.value < .5f) {
-                        board[x, y, 0] = DocurioEntity.Block;
-                        if (!kingPlaced && UnityEngine.Random.value < .25f) {
-                            board[x, y, 1] = DocurioEntity.King | DocurioEntity.White;
-                            kingPlaced = true;
-                        } else if (UnityEngine.Random.value < .25f) {
-                            board[x, y, 1] = DocurioEntity.Block;
-                        } else if (UnityEngine.Random.value < .3f) {
-                            board[x, y, 1] = DocurioEntity.Pusher | (UnityEngine.Random.value < .5f ? DocurioEntity.White : DocurioEntity.Black);
-                        }
+        public DocurioState(TextAsset text) {
+            string[] lines = Regex.Split(text.text, "\r\n|\n|\r");
+            xSize = lines[0].Length;
+            for (int i = 0; i < lines.Length; i++) {
+                string line = lines[i];
+                int firstChar = line[0] - '0';
+                if (firstChar < 0 || firstChar > 9) {
+                    break;
+                }
+                ySize++;
+                for (int j = 0; j < line.Length; j++) {
+                    zSize = Mathf.Max(zSize, line[j] - '0');
+                }
+            }
+            zSize += 2;
+            board = new DocurioEntity[xSize, ySize, zSize];
+            for (int x = 0; x < xSize; x++) {
+                for (int y = 0; y < ySize; y++) {
+                    int height = lines[y][x] - '0';
+                    for (int z = 0; z < height; z++) {
+                        board[x, y, z] = DocurioEntity.Block;
                     }
                 }
             }
+            for (int i = ySize; i < lines.Length; i++) {
+                string line = lines[i];
+                DocurioEntity piece = CHAR_TO_PIECE[line[0]];
+                string[] tokens = line.Substring(1).Split(',');
+                int x = int.Parse(tokens[0]);
+                int y = int.Parse(tokens[1]);
+                int z = GroundZ(x, y);
+                board[x, y, z] = piece;
+                if (Is(x, y, z, DocurioEntity.White)) {
+                    whitePieces++;
+                } else if (Is(x, y, z, DocurioEntity.Black)) {
+                    blackPieces++;
+                }
+            }
             toPlay = 0;
+            win = -1;
+        }
+        public DocurioState(DocurioState other) {
+            xSize = other.xSize;
+            ySize = other.ySize;
+            zSize = other.zSize;
+            board = new DocurioEntity[xSize, ySize, zSize];
+            Array.Copy(other.board, board, xSize * ySize * zSize);
+            toPlay = other.toPlay;
+            whitePieces = other.whitePieces;
+            blackPieces = other.blackPieces;
+            win = other.win;
+            moves = other.moves;
         }
 
         public DocurioEntity Get(Int3 coor) {
@@ -59,10 +95,11 @@ namespace Assets.Code {
         }
 
         public void Execute(DocurioMove move, List<Tuple<Int3, Int3>> slides = null, List<Int3> destroyedUnits = null) {
-            toPlay = (toPlay + 1) % 2;
+            moves++;
             Int3 from = move.from, to = move.to;
             Int2 pushDirection = move.pushDirection;
             if (destroyedUnits != null && from != to && !Is(to, DocurioEntity.Empty)) {
+                Capture(to);
                 destroyedUnits.Add(to);
             }
             MoveEntity(from, to);
@@ -81,7 +118,9 @@ namespace Assets.Code {
                 int columnsOverHole = 0;
                 while (true) {
                     if (destroyedUnits != null && !Is(destX, destY, destZ, DocurioEntity.Empty)) {
-                        destroyedUnits.Add(new Int3(destX, destY, destZ));
+                        Int3 coor = new Int3(destX, destY, destZ);
+                        Capture(coor);
+                        destroyedUnits.Add(coor);
                     }
                     int nextDestX = destX + pushDirection.x;
                     int nextDestY = destY + pushDirection.y;
@@ -99,8 +138,6 @@ namespace Assets.Code {
                     destZ = GroundZ(destX, destY);
                 }
                 // Perform the actual pushes.
-                int pushX = to.x;
-                int pushY = to.y;
                 for(; numColumnsPushed > 0; numColumnsPushed--) {
                     behindX -= pushDirection.x;
                     behindY -= pushDirection.y;
@@ -120,6 +157,10 @@ namespace Assets.Code {
                     destZ = GroundZ(destX, destY);
                 }
             }
+            toPlay = (toPlay + 1) % 2;
+            if (!this.MoveExists()) {
+                win = 1 - toPlay;
+            }
         }
         public void MoveEntity(Int3 from, Int3 to) {
             if (from == to) {
@@ -127,6 +168,48 @@ namespace Assets.Code {
             }
             board[to.x, to.y, to.z] = board[from.x, from.y, from.z];
             board[from.x, from.y, from.z] = DocurioEntity.Empty;
+        }
+        public void Capture(Int3 coor) {
+            Debug.Assert(Is(coor, DocurioEntity.White) || Is(coor, DocurioEntity.Black));
+            if (Is(coor, DocurioEntity.White)) {
+                if (--whitePieces == 0 || Is(coor, DocurioEntity.King)) {
+                    win = 1;
+                }
+            } else {
+                if (--blackPieces == 0 || Is(coor, DocurioEntity.King)) {
+                    win = 0;
+                }
+            }
+        }
+
+        static readonly HashBuilder hashBuilder = new HashBuilder();
+        public override int GetHashCode() {
+            hashBuilder.Clear();
+            for (int x = 0; x < xSize; x++) {
+                for (int y = 0; y < ySize; y++) {
+                    int z = GroundZ(x, y);
+                    hashBuilder.Add(z); // only neccessary if the number of blocks on the board can change
+                    hashBuilder.Add(board[x, y, z]);
+                }
+            }
+            return hashBuilder.GetHashCode();
+        }
+        public override bool Equals(object obj) {
+            // Only reliable on boards of equal size.
+            if (!(obj is DocurioState)) {
+                return false;
+            }
+            DocurioState other = (DocurioState)obj;
+            for (int x = 0; x < xSize; x++) {
+                for (int y = 0; y < ySize; y++) {
+                    for (int z = zSize - 1; z >= 0; z++) {
+                        if (board[x, y, z] != other.board[x, y, z]) {
+                            return false;
+                        }
+                    }
+                }
+            }
+            return true;
         }
     }
 
@@ -141,6 +224,8 @@ namespace Assets.Code {
     }
 
     public struct DocurioMove {
+        public static DocurioMove None = new DocurioMove(Int3.None, Int3.None, Int2.None);
+
         public Int3 from, to;
         public Int2 pushDirection;
 
@@ -149,5 +234,20 @@ namespace Assets.Code {
             this.to = to;
             this.pushDirection = pushDirection;
         }
+
+        public override int GetHashCode() {
+            return from.GetHashCode() ^ to.GetHashCode() ^ pushDirection.GetHashCode();
+        }
+        public override bool Equals(object obj) {
+            if (!(obj is DocurioMove)) {
+                return false;
+            }
+            DocurioMove other = (DocurioMove)obj;
+            return other == this;
+        }
+        public static bool operator ==(DocurioMove a, DocurioMove b) {
+            return a.from == b.from && a.to == b.to && a.pushDirection == b.pushDirection;
+        }
+        public static bool operator !=(DocurioMove a, DocurioMove b) => !(a == b);
     }
 }

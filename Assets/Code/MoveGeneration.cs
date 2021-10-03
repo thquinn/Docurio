@@ -14,6 +14,38 @@ namespace Assets.Code {
             { DocurioEntity.Pusher, new UnitProperties(){ canPush = true } },
         };
 
+        public static List<DocurioMove> AllMoves(this DocurioState state) {
+            List<DocurioMove> moves = new List<DocurioMove>();
+            DocurioEntity color = state.toPlay == 0 ? DocurioEntity.White : DocurioEntity.Black;
+            for (int x = 0; x < state.xSize; x++) {
+                for (int y = 0; y < state.ySize; y++) {
+                    for (int z = state.zSize - 1; z >= 0; z--) {
+                        if (state.Is(x, y, z, color)) {
+                            state.AddMoves(moves, new Int3(x, y, z));
+                        }
+                    }
+                }
+            }
+            return moves;
+        }
+        public static bool MoveExists(this DocurioState state) {
+            List<DocurioMove> moves = new List<DocurioMove>();
+            DocurioEntity color = state.toPlay == 0 ? DocurioEntity.White : DocurioEntity.Black;
+            for (int x = 0; x < state.xSize; x++) {
+                for (int y = 0; y < state.ySize; y++) {
+                    for (int z = state.zSize - 1; z >= 0; z--) {
+                        if (state.Is(x, y, z, color)) {
+                            state.AddMoves(moves, new Int3(x, y, z));
+                            if (moves.Count > 0) {
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+            return false;
+        }
+
         public static void AddMoves(this DocurioState state, List<DocurioMove> moves, Int3 from) {
             DocurioEntity piece = state.Get(from);
             if ((piece & DocurioEntity.King) > 0) {
@@ -76,7 +108,7 @@ namespace Assets.Code {
                     // Check for other pieces in the space.
                     Int3 space = new Int3(x, y, z);
                     if (!state.Is(space, DocurioEntity.Empty)) {
-                        if ((state.Get(from) | DocurioEntity.White) != (state.Get(space) | DocurioEntity.White)) {
+                        if ((state.Is(from, DocurioEntity.White) && state.Is(space, DocurioEntity.Black)) || (state.Is(from, DocurioEntity.Black) && state.Is(space, DocurioEntity.White))) {
                             // Capture.
                             moves.Add(new DocurioMove(from, space));
                         }

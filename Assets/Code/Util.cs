@@ -27,6 +27,17 @@ namespace Assets.Code {
             return Int3.None;
         }
 
+        public static void ShuffleList<T>(System.Random random, List<T> list) {
+            int n = list.Count;
+            while (n > 1) {
+                n--;
+                int k = random.Next(n + 1);
+                T value = list[k];
+                list[k] = list[n];
+                list[n] = value;
+            }
+        }
+
         static Camera mainCamera;
         public static Collider GetMouseCollider(LayerMask layerMask) {
             if (mainCamera == null) mainCamera = Camera.main;
@@ -100,5 +111,37 @@ namespace Assets.Code {
             return a.x == b.x && a.y == b.y && a.z == b.z;
         }
         public static bool operator !=(Int3 a, Int3 b) => !(a == b);
+    }
+
+    // from weston on StackOverflow
+    public sealed class HashBuilder {
+        private int hash = 17;
+
+        public HashBuilder Add(int value) {
+            unchecked {
+                hash = hash * 31 + value;
+            }
+            return this;
+        }
+
+        public HashBuilder Add(object value) {
+            return Add(value != null ? value.GetHashCode() : 0);
+        }
+
+        public HashBuilder Add(float value) {
+            return Add(value.GetHashCode());
+        }
+
+        public HashBuilder Add(double value) {
+            return Add(value.GetHashCode());
+        }
+
+        public void Clear() {
+            hash = 0;
+        }
+
+        public override int GetHashCode() {
+            return hash;
+        }
     }
 }
