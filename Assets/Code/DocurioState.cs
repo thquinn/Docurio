@@ -98,9 +98,11 @@ namespace Assets.Code {
             moves++;
             Int3 from = move.from, to = move.to;
             Int2 pushDirection = move.pushDirection;
-            if (destroyedUnits != null && from != to && !Is(to, DocurioEntity.Empty)) {
+            if (from != to && !Is(to, DocurioEntity.Empty)) {
                 Capture(to);
-                destroyedUnits.Add(to);
+                if (destroyedUnits != null) {
+                    destroyedUnits.Add(to);
+                }
             }
             MoveEntity(from, to);
             if (!pushDirection.IsZero()) {
@@ -117,10 +119,12 @@ namespace Assets.Code {
                 int destX = behindX, destY = behindY, destZ = GroundZ(destX, destY);
                 int columnsOverHole = 0;
                 while (true) {
-                    if (destroyedUnits != null && !Is(destX, destY, destZ, DocurioEntity.Empty)) {
+                    if (!Is(destX, destY, destZ, DocurioEntity.Empty)) {
                         Int3 coor = new Int3(destX, destY, destZ);
                         Capture(coor);
-                        destroyedUnits.Add(coor);
+                        if (destroyedUnits != null) {
+                            destroyedUnits.Add(coor);
+                        }
                     }
                     int nextDestX = destX + pushDirection.x;
                     int nextDestY = destY + pushDirection.y;
@@ -235,6 +239,9 @@ namespace Assets.Code {
             this.pushDirection = pushDirection;
         }
 
+        public override string ToString() {
+            return pushDirection.IsZero() ? string.Format("{0}->{1}", from, to) : string.Format("{0}->{1}, push {2}", from, to, pushDirection);
+        }
         public override int GetHashCode() {
             return from.GetHashCode() ^ to.GetHashCode() ^ pushDirection.GetHashCode();
         }

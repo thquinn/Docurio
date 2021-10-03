@@ -65,9 +65,8 @@ namespace Assets.Code {
             // Expansion.
             currentNode = currentNode.Expand(currentState, random);
             // Simulation.
-            List<DocurioMove> randomMoves = new List<DocurioMove>();
             while (currentState.win == -1) {
-                if (currentState.moves > 200) {
+                if (currentState.moves > rootState.moves + 100) {
                     draws++;
                     break;
                 }
@@ -77,7 +76,6 @@ namespace Assets.Code {
                     break;
                 }
                 int i = random.Next(moves.Count);
-                randomMoves.Add(moves[i]);
                 currentState.Execute(moves[i]);
             }
             // Backpropagate.
