@@ -5,17 +5,18 @@ using UnityEngine;
 
 public class GameBoardScript : MonoBehaviour
 {
-    public GameObject tilePrefab, blockPrefab, unitPrefab, selectTilePrefab, selectBlockPrefab;
+    public GameObject tilePrefab, blockPrefab, unitPrefab, selectTilePrefab, selectBlockPrefab, aiIndicatorPrefab, unitTooltipPrefab;
     public LayerMask layerMaskSwitch, layerMaskMove;
     public static float entityHeight;
 
     LevelInfo levelInfo;
-    DocurioState state;
+    public DocurioState state;
     GameObject[,] tileObjects;
-    EntityScript[,,] entityScripts;
+    public EntityScript[,,] entityScripts;
     // Unit and move selection.
     bool[] aiControl;
     Dictionary<Collider, DocurioMove> selectMoveObjects = new Dictionary<Collider, DocurioMove>();
+    AiIndicatorScript aiIndicator;
 
     public void Init(LevelInfo levelInfo) {
         this.levelInfo = levelInfo;
@@ -60,6 +61,7 @@ public class GameBoardScript : MonoBehaviour
             }
         }
         aiControl = new bool[] { false, true };
+        Instantiate(unitTooltipPrefab, GameObject.FindGameObjectWithTag("Canvas").transform).GetComponent<UnitTooltipScript>().Set(this, layerMaskSwitch);
     }
 
     void Update() {
@@ -69,9 +71,12 @@ public class GameBoardScript : MonoBehaviour
         if (aiControl[state.toPlay]) {
             if (AI.status == AIStatus.Ready) {
                 AI.Start(state, (int)levelInfo.difficulty);
+                aiIndicator = Instantiate(aiIndicatorPrefab, GameObject.FindGameObjectWithTag("Canvas").transform).GetComponent<AiIndicatorScript>();
             } else if (!IsAnimating() && AI.status == AIStatus.Done) {
                 ExecuteMove(AI.move);
                 AI.status = AIStatus.Ready;
+                aiIndicator.Destroy();
+                aiIndicator = null;
             }
             return;
         }

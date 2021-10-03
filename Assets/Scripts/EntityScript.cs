@@ -145,6 +145,7 @@ class UnitRunAnimation : UnitAnimation {
         float distance = Mathf.Sqrt(dx * dx + dy * dy);
         distance = Mathf.Sqrt(distance); // EaseInOutQuad causes longer distances to take proportionately longer
         totalFrames = Mathf.RoundToInt(distance / RUN_SPEED);
+        SFXScript.instance.Run();
     }
 
     public override Vector3 Tick() {
@@ -225,6 +226,7 @@ class UnitPushAnimation : UnitAnimation {
         foreach (var kvp in slides) {
             kvp.Key.AnimateSlideAndDrop(kvp.Value);
         }
+        SFXScript.instance.Push();
         return to;
     }
 }

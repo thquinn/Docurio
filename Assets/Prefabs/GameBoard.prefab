@@ -53,10 +53,13 @@ MonoBehaviour:
     type: 3}
   selectBlockPrefab: {fileID: 6470192191040034354, guid: 0dc46e36dbddb9f4f85b4a1287cd2db6,
     type: 3}
+  aiIndicatorPrefab: {fileID: 8023031653617503796, guid: 28c44d45eed764c46912a83b2f40c694,
+    type: 3}
+  unitTooltipPrefab: {fileID: 60960660743439487, guid: 090221a538335de4183c3eb333101f19,
+    type: 3}
   layerMaskSwitch:
     serializedVersion: 2
     m_Bits: 256
   layerMaskMove:
     serializedVersion: 2
     m_Bits: 1536
-  levelText: {fileID: 4900000, guid: 697b4696f507a484e99317081c6d5abc, type: 3}

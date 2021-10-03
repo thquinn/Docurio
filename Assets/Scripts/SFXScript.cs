@@ -5,7 +5,7 @@ using UnityEngine;
 public class SFXScript : MonoBehaviour
 {
     public static SFXScript instance;
-    public AudioSource hover;
+    public AudioSource hover, push, run;
 
     void Start()
     {
@@ -14,5 +14,11 @@ public class SFXScript : MonoBehaviour
 
     public void Hover() {
         hover.PlayOneShot(hover.clip);
+    }
+    public void Push() {
+        push.PlayOneShot(push.clip);
+    }
+    public void Run() {
+        run.PlayOneShot(run.clip);
     }
 }
