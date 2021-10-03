@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 public class ButtonScript : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerClickHandler
 {
@@ -15,7 +16,9 @@ public class ButtonScript : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
     bool hovered;
     #pragma warning disable 0649
     public LevelInfo levelInfo;
-    #pragma warning restore 0649
+#pragma warning restore 0649
+    public Image icon, sideCard, topCard;
+    public Sprite checkSprite;
 
     // Update is called once per frame
     void Update()
@@ -31,6 +34,13 @@ public class ButtonScript : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
 
     public void SetLevelInfo(LevelInfo levelInfo) {
         this.levelInfo = levelInfo;
+    }
+
+    public void SetComplete() {
+        icon.sprite = checkSprite;
+        icon.color = new Color(0.7882354f, 0.8039216f, 0.7843138f, 1);
+        sideCard.color = new Color(0.682353f, 0.7215686f, 0.6588235f, 1);
+        topCard.color = new Color(0.6470588f, 0.6901961f, 0.6235294f, 1);
     }
 
     public void OnPointerEnter(PointerEventData eventData) {

@@ -52,6 +52,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   shadow: {fileID: 7904121960938748798}
   button: {fileID: 7904121960244395798}
+  difficultyText: {fileID: 0}
+  difficultyGroup: {fileID: 0}
+  icon: {fileID: 7904121961164427512}
+  sideCard: {fileID: 7904121960244395796}
+  topCard: {fileID: 7904121962222500062}
+  checkSprite: {fileID: 21300000, guid: c20aab201b7026d4bb7792159b82b478, type: 3}
 --- !u!1 &7904121960244395798
 GameObject:
   m_ObjectHideFlags: 0
@@ -112,7 +118,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.827451, g: 0.827451, b: 0.827451, a: 1}
+  m_Color: {r: 0.64705884, g: 0.6901961, b: 0.62352943, a: 1}
   m_RaycastTarget: 1
   m_Maskable: 1
   m_OnCullStateChanged:
@@ -260,7 +266,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.6431373, g: 0.6862745, b: 0.61960787, a: 1}
+  m_Color: {r: 0.64705884, g: 0.6901961, b: 0.62352943, a: 1}
   m_RaycastTarget: 1
   m_Maskable: 1
   m_OnCullStateChanged:

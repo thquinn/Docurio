@@ -16,7 +16,7 @@ public class GameBoardScript : MonoBehaviour
     // Unit and move selection.
     bool[] aiControl;
     Dictionary<Collider, DocurioMove> selectMoveObjects = new Dictionary<Collider, DocurioMove>();
-    AiIndicatorScript aiIndicator;
+    public AiIndicatorScript aiIndicator;
 
     public void Init(LevelInfo levelInfo) {
         this.levelInfo = levelInfo;
@@ -70,7 +70,9 @@ public class GameBoardScript : MonoBehaviour
         }
         if (aiControl[state.toPlay]) {
             if (AI.status == AIStatus.Ready) {
-                AI.Start(state, (int)levelInfo.difficulty);
+                int playouts = (int)levelInfo.difficulty;
+                if (state.toPlay == 0) playouts *= 10; // for testing if levels are beatable
+                AI.Start(state, playouts);
                 aiIndicator = Instantiate(aiIndicatorPrefab, GameObject.FindGameObjectWithTag("Canvas").transform).GetComponent<AiIndicatorScript>();
             } else if (!IsAnimating() && AI.status == AIStatus.Done) {
                 ExecuteMove(AI.move);

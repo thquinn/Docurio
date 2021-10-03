@@ -32,6 +32,12 @@ public class UnitTooltipScript : MonoBehaviour
             stayFrames++;
             if (stayFrames == STAY_FRAMES) {
                 Int3 from = Util.FindIndex3(gameBoardScript.entityScripts, collider.GetComponent<EntityScript>());
+                if (from == Int3.None) {
+                    lastCollider = null;
+                    stayFrames = 0;
+                    canvasGroup.alpha = 0;
+                    return;
+                }
                 SetText(gameBoardScript.state.Get(from));
             }
             if (stayFrames >= STAY_FRAMES) {

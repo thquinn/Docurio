@@ -9,10 +9,9 @@ using UnityEngine.Profiling;
 
 namespace Assets.Code {
     public class AI {
-        static Thread thread;
+        public static Thread thread;
         public static AIStatus status = AIStatus.Ready;
         public static DocurioMove move;
-        public static string statusString;
 
         public static void Start(DocurioState state, int rollouts) {
             status = AIStatus.Working;
@@ -46,7 +45,6 @@ namespace Assets.Code {
             }
             while (rootNode.rollouts < n) {
                 Rollout();
-                AI.statusString = rootNode.rollouts + " rollouts";
             }
             Profiler.EndThreadProfiling();
         }
