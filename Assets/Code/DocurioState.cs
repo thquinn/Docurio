@@ -15,6 +15,8 @@ namespace Assets.Code {
             { 'p', DocurioEntity.Black | DocurioEntity.Pusher },
             { 'S', DocurioEntity.White | DocurioEntity.Sniper },
             { 's', DocurioEntity.Black | DocurioEntity.Sniper },
+            { 'B', DocurioEntity.White | DocurioEntity.Bystander },
+            { 'b', DocurioEntity.Black | DocurioEntity.Bystander },
         };
 
         public int xSize, ySize, zSize;
@@ -240,6 +242,7 @@ namespace Assets.Code {
         King = 2 << 2,
         Pusher = 2 << 3,
         Sniper = 2 << 4,
+        Bystander = 2 << 30,
     }
 
     public struct DocurioMove {

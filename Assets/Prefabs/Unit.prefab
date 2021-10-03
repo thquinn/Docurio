@@ -139,6 +139,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   blackMaterial: {fileID: 2100000, guid: fcaa9f6b91374df4aac2b4cb5121e8ba, type: 2}
   meshFilter: {fileID: 2145269581339152887}
+  meshBystander: {fileID: -2432090755550338912, guid: 04de058bcb657e440a4021848654389f,
+    type: 3}
   prefabPusherAnim: {fileID: 2147502138393277544, guid: 2c6c30a2237c5224cbc3b8a739cab3e9,
     type: 3}
   prefabSniperAnim: {fileID: 4855197198148712312, guid: 3893a769b57087e44add1f1f586f80d8,

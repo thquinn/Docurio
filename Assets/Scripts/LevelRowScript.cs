@@ -10,7 +10,7 @@ public class LevelRowScript : MonoBehaviour
     public ButtonScript[] buttons;
 
     public void Set(int index, string name, string layout) {
-        tmpNumber.text = (index + 1).ToString();
+        tmpNumber.text = (index + 1) + ".";
         tmpName.text = name;
         buttons[0].SetLevelInfo(new LevelInfo(index, LevelDifficulty.Easy, layout));
         buttons[1].SetLevelInfo(new LevelInfo(index, LevelDifficulty.Standard, layout));

@@ -13,6 +13,7 @@ namespace Assets.Code {
             { DocurioEntity.King, new UnitProperties(){ diagonal = true, distance = 1, canClimb = false } },
             { DocurioEntity.Pusher, new UnitProperties(){ canPush = true } },
             { DocurioEntity.Sniper, new UnitProperties(){ diagonal = true, distance = 2, moveCapture = false } },
+            { DocurioEntity.Bystander, new UnitProperties(){ distance = 1, moveCapture = false } },
         };
 
         public static List<DocurioMove> AllMoves(this DocurioState state) {
@@ -52,13 +53,15 @@ namespace Assets.Code {
 
         public static void AddMoves(this DocurioState state, List<DocurioMove> moves, Int3 from) {
             DocurioEntity piece = state.Get(from);
-            if ((piece & DocurioEntity.King) > 0) {
+            if ((piece & DocurioEntity.King) != 0) {
                 AddCompassMoves(state, moves, from, UNIT_PROPERTIES[DocurioEntity.King]);
-            } else if ((piece & DocurioEntity.Pusher) > 0) {
+            } else if ((piece & DocurioEntity.Pusher) != 0) {
                 AddCompassMoves(state, moves, from, UNIT_PROPERTIES[DocurioEntity.Pusher]);
-            } else if ((piece & DocurioEntity.Sniper) > 0) {
+            } else if ((piece & DocurioEntity.Sniper) != 0) {
                 AddTeleportMoves(state, moves, from, UNIT_PROPERTIES[DocurioEntity.Sniper]);
                 AddSniperMoves(state, moves, from, UNIT_PROPERTIES[DocurioEntity.Sniper]);
+            } else if ((piece & DocurioEntity.Bystander) != 0) {
+                AddCompassMoves(state, moves, from, UNIT_PROPERTIES[DocurioEntity.Bystander]);
             } else {
                 throw new Exception("Could not find piece at " + from);
             }

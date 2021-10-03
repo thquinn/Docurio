@@ -8,6 +8,7 @@ public class EntityScript : MonoBehaviour
 {
     public Material blackMaterial;
     public MeshFilter meshFilter;
+    public Mesh meshBystander;
     public GameObject prefabPusherAnim, prefabSniperAnim;
     Material sniperMaterial;
 
@@ -25,6 +26,10 @@ public class EntityScript : MonoBehaviour
         foreach (MeshRenderer renderer in renderers) {
             renderer.material = sniperMaterial;
         }
+    }
+    public void BecomeBystander() {
+        meshFilter.mesh = meshBystander;
+        meshFilter.transform.localScale = new Vector3(.15f, .15f, .15f);
     }
     public void BecomeBlack() {
         if (sniperMaterial == null) {

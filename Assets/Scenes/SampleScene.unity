@@ -432,7 +432,11 @@ MonoBehaviour:
     type: 3}
   gameBoardPrefab: {fileID: 5295485929239945235, guid: b26bd0e1571edf84e99ffad454a9d7b7,
     type: 3}
+  controlsPopupPrefab: {fileID: 7122838064767017305, guid: 73ca0b3b0f356c54d8d7cfeecd159378,
+    type: 3}
+  canvasTransform: {fileID: 660958382}
   menuScroll: {fileID: 2113919723}
+  scrollRect: {fileID: 803071144}
   cameraScript: {fileID: 963194229}
 --- !u!4 &223974228
 Transform:

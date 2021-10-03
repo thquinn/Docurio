@@ -44,6 +44,9 @@ public class GameBoardScript : MonoBehaviour
                     } else if (state.Is(x, y, z, DocurioEntity.Sniper)) {
                         entity = Instantiate(unitPrefab, transform);
                         entity.GetComponent<EntityScript>().BecomeSniper();
+                    } else if (state.Is(x, y, z, DocurioEntity.Bystander)) {
+                        entity = Instantiate(unitPrefab, transform);
+                        entity.GetComponent<EntityScript>().BecomeBystander();
                     } else {
                         throw new Exception("Unknown piece type.");
                     }
@@ -180,5 +183,9 @@ public class GameBoardScript : MonoBehaviour
             Destroy(go);
         }
         selectMoveObjects.Clear();
+    }
+
+    public int Winner() {
+        return IsAnimating() ? -1 : state.win;
     }
 }

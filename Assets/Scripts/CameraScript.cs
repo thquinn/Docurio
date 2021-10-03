@@ -8,7 +8,7 @@ public class CameraScript : MonoBehaviour
     public float distance;
     public float sensitivity;
     public float scrollSensitivity;
-    float horizontalAngle = Mathf.PI * 5 / 4;
+    float horizontalAngle = Mathf.PI * 10 / 6;
     float verticalAngle = Mathf.PI / 6;
 
     public CameraMode mode = CameraMode.Menu;
