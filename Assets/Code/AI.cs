@@ -34,14 +34,14 @@ namespace Assets.Code {
 
         public MCTS(DocurioState state) {
             random = new System.Random(0);
-            rootNode = new MCTSNode(null, state, random);
+            rootNode = new MCTSNode(null, state);
             rootState = state;
         }
 
         public void Rollout(int n) {
             Profiler.BeginThreadProfiling("My Threads", "My Thread");
-            if (rootNode.children.Length == 1) {
-                Rollout();
+            Rollout();
+            if (rootNode.moves.Count == 1) {
                 return;
             }
             while (rootNode.rollouts < n) {
@@ -54,7 +54,7 @@ namespace Assets.Code {
             // Selection.
             MCTSNode currentNode = rootNode;
             DocurioState currentState = new DocurioState(rootState);
-            while (currentState.win == -1) {
+            while (currentNode.children != null && currentState.win == -1) {
                 MCTSMove move = currentNode.GetChild();
                 if (move.child == null) {
                     break;
@@ -94,18 +94,15 @@ namespace Assets.Code {
         public readonly static double EXPLORATION = 1;
 
         public MCTSNode parent;
-        List<DocurioMove> moves;
+        public List<DocurioMove> moves;
         public MCTSNode[] children;
         int expandedChildrenCount;
         public int toPlay;
         public int rollouts;
         public float totalReward;
 
-        public MCTSNode(MCTSNode parent, DocurioState state, System.Random random) {
+        public MCTSNode(MCTSNode parent, DocurioState state) {
             this.parent = parent;
-            moves = state.AllMoves();
-            Util.ShuffleList(random, moves);
-            children = new MCTSNode[moves.Count];
             toPlay = state.toPlay;
         }
 
@@ -128,10 +125,15 @@ namespace Assets.Code {
         }
 
         public MCTSNode Expand(DocurioState state, System.Random random) {
+            if (moves == null) {
+                moves = state.AllMoves();
+                Util.ShuffleList(random, moves);
+                children = new MCTSNode[moves.Count];
+            }
             if (children.Length == 0) return this;
             DocurioMove move = moves[expandedChildrenCount];
             state.Execute(move);
-            MCTSNode child = new MCTSNode(this, state, random);
+            MCTSNode child = new MCTSNode(this, state);
             children[expandedChildrenCount++] = child;
             return child;
         }

@@ -145,10 +145,12 @@ class UnitRunAnimation : UnitAnimation {
         float distance = Mathf.Sqrt(dx * dx + dy * dy);
         distance = Mathf.Sqrt(distance); // EaseInOutQuad causes longer distances to take proportionately longer
         totalFrames = Mathf.RoundToInt(distance / RUN_SPEED);
-        SFXScript.instance.Run();
     }
 
     public override Vector3 Tick() {
+        if (frame == 0) {
+            SFXScript.instance.Run();
+        }
         frame++;
         float t = frame / (float)totalFrames;
         t = EasingFunction.EaseInOutQuad(0, 1, t);
@@ -158,6 +160,7 @@ class UnitRunAnimation : UnitAnimation {
 
 class UnitDropAnimation : UnitAnimation {
     static float FALL_SPEED = .066f;
+    bool sfx;
 
     public UnitDropAnimation(Int3 from, Int3 to) : base(from, to) {
         int distance = from.z - to.z;
@@ -167,6 +170,10 @@ class UnitDropAnimation : UnitAnimation {
     public override Vector3 Tick() {
         frame++;
         float t = frame / (float)totalFrames;
+        if (t > .2f && !sfx) {
+            SFXScript.instance.Land();
+            sfx = true;
+        }
         float x = Mathf.Lerp(from.x, to.x, t);
         float y = EasingFunction.EaseInBack(from.y, to.y, t);
         float z = Mathf.Lerp(from.z, to.z, t);
@@ -183,6 +190,9 @@ class UnitJumpAnimation : UnitAnimation {
     }
 
     public override Vector3 Tick() {
+        if (frame == 0) {
+            SFXScript.instance.Jump();
+        }
         frame++;
         float t = frame / (float)totalFrames;
         float x = Mathf.Lerp(from.x, to.x, t);
