@@ -36,6 +36,7 @@ public class ButtonScript : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
     public void OnPointerEnter(PointerEventData eventData) {
         hovered = true;
         difficultyText.text = gameObject.name;
+        SFXScript.instance.Hover();
     }
 
     public void OnPointerExit(PointerEventData eventData) {
