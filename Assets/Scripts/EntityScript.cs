@@ -9,6 +9,7 @@ public class EntityScript : MonoBehaviour
     public Material blackMaterial;
     public MeshFilter meshFilter;
     public GameObject prefabPusherAnim, prefabSniperAnim;
+    Material sniperMaterial;
 
     Queue<UnitAnimation> animations = new Queue<UnitAnimation>();
 
@@ -19,10 +20,22 @@ public class EntityScript : MonoBehaviour
     public void BecomeSniper() {
         Destroy(meshFilter.gameObject);
         Instantiate(prefabSniperAnim, transform);
+        MeshRenderer[] renderers = GetComponentsInChildren<MeshRenderer>();
+        sniperMaterial = new Material(renderers[0].material);
+        foreach (MeshRenderer renderer in renderers) {
+            renderer.material = sniperMaterial;
+        }
     }
     public void BecomeBlack() {
-        foreach (MeshRenderer mr in GetComponentsInChildren<MeshRenderer>()) {
-            mr.material = blackMaterial;
+        if (sniperMaterial == null) {
+            foreach (MeshRenderer mr in GetComponentsInChildren<MeshRenderer>()) {
+                mr.material = blackMaterial;
+            }
+        } else {
+            sniperMaterial = new Material(blackMaterial);
+            foreach (MeshRenderer mr in GetComponentsInChildren<MeshRenderer>()) {
+                mr.material = sniperMaterial;
+            }
         }
     }
 
@@ -32,6 +45,17 @@ public class EntityScript : MonoBehaviour
         }
         UnitAnimation animation = animations.Peek();
         transform.localPosition = animation.Tick();
+        if (sniperMaterial != null) {
+            float opacity = animation.Opacity();
+            Color c = sniperMaterial.color;
+            if (c.a == 1 && opacity < 1) {
+                sniperMaterial.ToFadeMode();
+            } else if (c.a < 1 && opacity == 1) {
+                sniperMaterial.ToOpaqueMode();
+            }
+            c.a = opacity;
+            sniperMaterial.color = c;
+        }
         if (animation.IsDone()) {
             animations.Dequeue();
         }
@@ -72,6 +96,9 @@ public class EntityScript : MonoBehaviour
             animations.Enqueue(new UnitRunAnimation(runStart, end));
         }
     }
+    public void AnimateTeleport(DocurioMove move) {
+        animations.Enqueue(new UnitTeleportAnimation(move.from, move.to));
+    }
     public void AnimatePushes(Int3 loc, Dictionary<EntityScript, Tuple<Int3, Int3>> slides) {
         animations.Enqueue(new UnitPushAnimation(loc, slides));
     }
@@ -96,6 +123,9 @@ abstract class UnitAnimation {
     }
 
     public abstract Vector3 Tick();
+    public virtual float Opacity() {
+        return 1;
+    }
     public bool IsDone() {
         return frame >= totalFrames;
     }
@@ -153,6 +183,28 @@ class UnitJumpAnimation : UnitAnimation {
         float y = EasingFunction.EaseOutBack(from.y, to.y, t);
         float z = Mathf.Lerp(from.z, to.z, t);
         return new Vector3(x, y, z);
+    }
+}
+
+class UnitTeleportAnimation : UnitAnimation {
+    float t;
+    public UnitTeleportAnimation(Int3 from, Int3 to) : base(from, to) {
+        totalFrames = 60;
+    }
+
+    public override Vector3 Tick() {
+        frame++;
+        t = (float)frame / totalFrames;
+        if (t < .5) {
+            t *= 2;
+            return from + new Vector3(0, EasingFunction.EaseInQuad(0, 1, t), 0);
+        } else {
+            t = 1 - (t - .5f) * 2;
+            return to + new Vector3(0, EasingFunction.EaseInQuad(0, 1, t), 0);
+        }
+    }
+    public override float Opacity() {
+        return 1 - t;
     }
 }
 

@@ -57,7 +57,7 @@ namespace Assets.Code {
             } else if ((piece & DocurioEntity.Pusher) > 0) {
                 AddCompassMoves(state, moves, from, UNIT_PROPERTIES[DocurioEntity.Pusher]);
             } else if ((piece & DocurioEntity.Sniper) > 0) {
-                AddCompassMoves(state, moves, from, UNIT_PROPERTIES[DocurioEntity.Sniper]);
+                AddTeleportMoves(state, moves, from, UNIT_PROPERTIES[DocurioEntity.Sniper]);
                 AddSniperMoves(state, moves, from, UNIT_PROPERTIES[DocurioEntity.Sniper]);
             } else {
                 throw new Exception("Could not find piece at " + from);
@@ -74,7 +74,7 @@ namespace Assets.Code {
                 while (x >= 0 && x < state.xSize && y >= 0 && y < state.ySize) {
                     bool diagonal = direction.x != 0 && direction.y != 0;
                     int z = state.GroundZ(x, y);
-                    
+
                     if (unitProperties.canPush && z > lastZ && !diagonal) {
                         // Pushing.
                         int checkX = x + direction.x, checkY = y + direction.y;
@@ -134,37 +134,50 @@ namespace Assets.Code {
                 }
             }
         }
-        public static void AddSniperMoves(DocurioState state, List<DocurioMove> moves, Int3 from, UnitProperties unitProperties) {
-            foreach (Int2 direction in unitProperties.diagonal ? CARDINALS_AND_ORDINALS : CARDINALS) {
-                int x = from.x + direction.x * (unitProperties.distance);
-                int y = from.y + direction.y * (unitProperties.distance);
-                int lastZ = -1;
-                while (x >= 0 && x < state.xSize && y >= 0 && y < state.ySize) {
-                    if (lastZ == -1) {
-                        lastZ = state.GroundZ(x, y);
-                        x += direction.x;
-                        y += direction.y;
+        public static void AddTeleportMoves(DocurioState state, List<DocurioMove> moves, Int3 from, UnitProperties unitProperties) {
+            for (int dx = Mathf.Max(-from.x, -unitProperties.distance); dx <= unitProperties.distance; dx++) {
+                int x = from.x + dx;
+                if (x >= state.xSize) {
+                    break;
+                }
+                for (int dy = Mathf.Max(-from.y, -unitProperties.distance); dy <= unitProperties.distance; dy++) {
+                    int y = from.y + dy;
+                    if (y >= state.ySize) {
+                        break;
+                    }
+                    if (Mathf.Abs(dx) + Mathf.Abs(dy) > unitProperties.distance) {
                         continue;
                     }
                     int z = state.GroundZ(x, y);
-                    if (z < lastZ) {
-                        // Units hiding behind cover.
-                        x += direction.x;
-                        y += direction.y;
-                        lastZ = z;
-                        continue;
+                    if (state.Is(x, y, z, DocurioEntity.Empty)) {
+                        moves.Add(new DocurioMove(from, new Int3(x, y, z)));
                     }
-                    // Check for a piece in the space.
-                    Int3 space = new Int3(x, y, z);
-                    if (!state.Is(space, DocurioEntity.Empty)) {
+                }
+            }
+        }
+        public static void AddSniperMoves(DocurioState state, List<DocurioMove> moves, Int3 from, UnitProperties unitProperties) {
+            foreach (Int2 direction in unitProperties.diagonal ? CARDINALS_AND_ORDINALS : CARDINALS) {
+                int x = from.x + direction.x;
+                int y = from.y + direction.y;
+                int lastZ = from.z;
+                int distance = 1;
+                while (x >= 0 && x < state.xSize && y >= 0 && y < state.ySize) {
+                    int z = state.GroundZ(x, y);
+                    if (z > from.z) {
+                        break;
+                    }
+                    if (distance > unitProperties.distance && z == from.z && !state.Is(x, y, z, DocurioEntity.Empty)) {
+                        Int3 space = new Int3(x, y, z);
                         if ((state.Is(from, DocurioEntity.White) && state.Is(space, DocurioEntity.Black)) || (state.Is(from, DocurioEntity.Black) && state.Is(space, DocurioEntity.White))) {
                             // Snipe.
                             moves.Add(new DocurioMove(from, space, Int2.Zero, true));
                         }
+                        break;
                     }
                     x += direction.x;
                     y += direction.y;
                     lastZ = z;
+                    distance++;
                 }
             }
         }

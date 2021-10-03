@@ -7,9 +7,9 @@ public class GameBoardScript : MonoBehaviour
 {
     public GameObject tilePrefab, blockPrefab, unitPrefab, selectTilePrefab, selectBlockPrefab;
     public LayerMask layerMaskSwitch, layerMaskMove;
-    public TextAsset levelText;
     public static float entityHeight;
 
+    LevelInfo levelInfo;
     DocurioState state;
     GameObject[,] tileObjects;
     EntityScript[,,] entityScripts;
@@ -17,15 +17,15 @@ public class GameBoardScript : MonoBehaviour
     bool[] aiControl;
     Dictionary<Collider, DocurioMove> selectMoveObjects = new Dictionary<Collider, DocurioMove>();
 
-    void Start() {
-        int size = 7;
-        transform.localPosition = new Vector3((size - 1) / -2, 0, (size - 1) / -2);
-        state = new DocurioState(levelText);
-        tileObjects = new GameObject[size, size];
-        entityScripts = new EntityScript[size, size, state.zSize];
+    public void Init(LevelInfo levelInfo) {
+        this.levelInfo = levelInfo;
+        state = new DocurioState(levelInfo.layout);
+        transform.localPosition = new Vector3((state.xSize - 1) / -2f, 0, (state.ySize - 1) / -2f);
+        tileObjects = new GameObject[state.xSize, state.ySize];
+        entityScripts = new EntityScript[state.xSize, state.ySize, state.zSize];
         entityHeight = blockPrefab.transform.localScale.y;
-        for (int x = 0; x < size; x++) {
-            for (int y = 0; y < size; y++) {
+        for (int x = 0; x < state.xSize; x++) {
+            for (int y = 0; y < state.ySize; y++) {
                 GameObject tile = Instantiate(tilePrefab, transform);
                 tile.transform.localPosition = new Vector3(x, 0, y);
                 tileObjects[x, y] = tile;
@@ -56,7 +56,7 @@ public class GameBoardScript : MonoBehaviour
                 }
             }
         }
-        aiControl = new bool[] { true, true };
+        aiControl = new bool[] { false, true };
     }
 
     void Update() {
@@ -65,7 +65,7 @@ public class GameBoardScript : MonoBehaviour
         }
         if (aiControl[state.toPlay]) {
             if (AI.status == AIStatus.Ready) {
-                AI.Start(state, 10000);
+                AI.Start(state, (int)levelInfo.difficulty);
             } else if (!IsAnimating() && AI.status == AIStatus.Done) {
                 ExecuteMove(AI.move);
                 AI.status = AIStatus.Ready;
@@ -117,7 +117,11 @@ public class GameBoardScript : MonoBehaviour
         if (!move.snipe && move.from != move.to) {
             entityScripts[move.to.x, move.to.y, move.to.z] = unitScript;
             entityScripts[move.from.x, move.from.y, move.from.z] = null;
-            unitScript.AnimateLinearMove(state, move);
+            if (state.Is(move.to, DocurioEntity.Sniper)) {
+                unitScript.AnimateTeleport(move);
+            } else {
+                unitScript.AnimateLinearMove(state, move);
+            }
         }
         Dictionary<EntityScript, Tuple<Int3, Int3>> scriptToSlide = new Dictionary<EntityScript, Tuple<Int3, Int3>>();
         foreach (Tuple<Int3, Int3> slide in slides) {

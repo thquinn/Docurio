@@ -21,8 +21,8 @@ namespace Assets.Code {
         public DocurioEntity[,,] board;
         public int toPlay, whitePieces, blackPieces, win, moves;
 
-        public DocurioState(TextAsset text) {
-            string[] lines = Regex.Split(text.text, "\r\n|\n|\r");
+        public DocurioState(string layout) {
+            string[] lines = Regex.Split(layout, "\r\n|\n|\r");
             xSize = lines[0].Length;
             for (int i = 0; i < lines.Length; i++) {
                 string line = lines[i];
@@ -132,18 +132,27 @@ namespace Assets.Code {
                     }
                     int nextDestX = destX + pushDirection.x;
                     int nextDestY = destY + pushDirection.y;
-                    if (nextDestX < 0 || nextDestX >= xSize || nextDestY < 0 || nextDestY >= ySize || GroundZ(nextDestX, nextDestY) > to.z) { // Hit a wall.
+                    if (nextDestX < 0 || nextDestX >= xSize || nextDestY < 0 || nextDestY >= ySize) { // Hit the edge of the board.
+                        break;
+                    }
+                    int nextDestZ = GroundZ(nextDestX, nextDestY);
+                    if (nextDestZ > to.z) { // Hit a wall.
                         break;
                     }
                     if (destZ < to.z) { // Hit a hole.
                         columnsOverHole++;
                         if (columnsOverHole >= numColumnsPushed) {
+                            // We can fit all the columns being pushed.
+                            break;
+                        }
+                        if (nextDestZ == to.z) {
+                            // We've run out of holes for our columns.
                             break;
                         }
                     }
                     destX = nextDestX;
                     destY = nextDestY;
-                    destZ = GroundZ(destX, destY);
+                    destZ = nextDestZ;
                 }
                 // Perform the actual pushes.
                 for(; numColumnsPushed > 0; numColumnsPushed--) {
@@ -188,6 +197,7 @@ namespace Assets.Code {
                     win = 0;
                 }
             }
+            board[coor.x, coor.y, coor.z] = DocurioEntity.Empty;
         }
 
         static readonly HashBuilder hashBuilder = new HashBuilder();
@@ -250,7 +260,7 @@ namespace Assets.Code {
             return pushDirection.IsZero() ? string.Format("{0}->{1}", from, to) : string.Format("{0}->{1}, push {2}", from, to, pushDirection);
         }
         public override int GetHashCode() {
-            return from.GetHashCode() ^ to.GetHashCode() ^ pushDirection.GetHashCode();
+            return from.GetHashCode() ^ to.GetHashCode() ^ pushDirection.GetHashCode(); // TODO: update with new members?
         }
         public override bool Equals(object obj) {
             if (!(obj is DocurioMove)) {

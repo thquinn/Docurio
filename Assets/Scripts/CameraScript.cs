@@ -11,14 +11,18 @@ public class CameraScript : MonoBehaviour
     float horizontalAngle = Mathf.PI * 5 / 4;
     float verticalAngle = Mathf.PI / 6;
 
+    public CameraMode mode = CameraMode.Menu;
+
     private void Update() {
         // Input.
-        distance *= Mathf.Pow(scrollSensitivity, Input.mouseScrollDelta.y);
-        distance = Mathf.Clamp(distance, 4, 10);
-        if (Input.GetMouseButton(1)) {
-            horizontalAngle -= Input.GetAxis("Mouse X") * sensitivity;
-            verticalAngle -= Input.GetAxis("Mouse Y") * sensitivity;
-            verticalAngle = Mathf.Clamp(verticalAngle, Mathf.PI * .1f, Mathf.PI * .49f);
+        if (mode == CameraMode.Game) {
+            distance *= Mathf.Pow(scrollSensitivity, Input.mouseScrollDelta.y);
+            distance = Mathf.Clamp(distance, 4, 10);
+            if (Input.GetMouseButton(1)) {
+                horizontalAngle -= Input.GetAxis("Mouse X") * sensitivity;
+                verticalAngle -= Input.GetAxis("Mouse Y") * sensitivity;
+                verticalAngle = Mathf.Clamp(verticalAngle, Mathf.PI * .1f, Mathf.PI * .49f);
+            }
         }
 
         // Set position.
@@ -29,4 +33,8 @@ public class CameraScript : MonoBehaviour
         transform.localPosition = new Vector3(x, y, z);
         transform.LookAt(lookAt);
     }
+}
+
+public enum CameraMode {
+    Menu, Game
 }

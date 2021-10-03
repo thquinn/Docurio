@@ -91,7 +91,7 @@ namespace Assets.Code {
     }
 
     public class MCTSNode {
-        public readonly static double EXPLORATION = Math.Sqrt(2);
+        public readonly static double EXPLORATION = 1;
 
         public MCTSNode parent;
         List<DocurioMove> moves;
