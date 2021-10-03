@@ -54,7 +54,7 @@ namespace Assets.Code {
             // Selection.
             MCTSNode currentNode = rootNode;
             DocurioState currentState = new DocurioState(rootState);
-            while (true) {
+            while (currentState.win == -1) {
                 MCTSMove move = currentNode.GetChild();
                 if (move.child == null) {
                     break;

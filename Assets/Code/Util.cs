@@ -52,6 +52,7 @@ namespace Assets.Code {
 
     public struct Int2 {
         public static Int2 None = new Int2(-1, -1);
+        public static Int2 Zero = new Int2(0, 0);
         public int x, y;
 
         public Int2(int x, int y) {

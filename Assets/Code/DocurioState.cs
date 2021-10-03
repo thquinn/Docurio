@@ -13,6 +13,8 @@ namespace Assets.Code {
             { 'k', DocurioEntity.Black | DocurioEntity.King },
             { 'P', DocurioEntity.White | DocurioEntity.Pusher },
             { 'p', DocurioEntity.Black | DocurioEntity.Pusher },
+            { 'S', DocurioEntity.White | DocurioEntity.Sniper },
+            { 's', DocurioEntity.Black | DocurioEntity.Sniper },
         };
 
         public int xSize, ySize, zSize;
@@ -104,7 +106,9 @@ namespace Assets.Code {
                     destroyedUnits.Add(to);
                 }
             }
-            MoveEntity(from, to);
+            if (!move.snipe) {
+                MoveEntity(from, to);
+            }
             if (!pushDirection.IsZero()) {
                 // Find the space behind the columns being pushed.
                 int behindX = to.x + pushDirection.x * 2, behindY = to.y + pushDirection.y * 2, behindZ = GroundZ(behindX, behindY);
@@ -225,6 +229,7 @@ namespace Assets.Code {
         Black = 2 << 1,
         King = 2 << 2,
         Pusher = 2 << 3,
+        Sniper = 2 << 4,
     }
 
     public struct DocurioMove {
@@ -232,11 +237,13 @@ namespace Assets.Code {
 
         public Int3 from, to;
         public Int2 pushDirection;
+        public bool snipe;
 
-        public DocurioMove(Int3 from, Int3 to, Int2 pushDirection = new Int2()) {
+        public DocurioMove(Int3 from, Int3 to, Int2 pushDirection = new Int2(), bool snipe = false) {
             this.from = from;
             this.to = to;
             this.pushDirection = pushDirection;
+            this.snipe = snipe;
         }
 
         public override string ToString() {

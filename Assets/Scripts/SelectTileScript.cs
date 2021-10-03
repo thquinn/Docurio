@@ -12,7 +12,7 @@ public class SelectTileScript : MonoBehaviour
 
     void Start() {
         targetPos = spriteRenderer.transform.localPosition;
-        spriteRenderer.transform.localPosition = new Vector3(0, .33f, 0);
+        spriteRenderer.transform.localPosition = new Vector3(0, .5f, 0);
         Color c = spriteRenderer.color;
         c.a = 0;
         spriteRenderer.color = c;
@@ -26,5 +26,9 @@ public class SelectTileScript : MonoBehaviour
         if (c.a >= 1) {
             Destroy(this);
         }
+    }
+
+    public void CaptureColor() {
+        spriteRenderer.color = Color.red;
     }
 }

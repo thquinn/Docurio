@@ -12,10 +12,14 @@ namespace Assets.Code {
         static Dictionary<DocurioEntity, UnitProperties> UNIT_PROPERTIES = new Dictionary<DocurioEntity, UnitProperties>{
             { DocurioEntity.King, new UnitProperties(){ diagonal = true, distance = 1, canClimb = false } },
             { DocurioEntity.Pusher, new UnitProperties(){ canPush = true } },
+            { DocurioEntity.Sniper, new UnitProperties(){ diagonal = true, distance = 2, moveCapture = false } },
         };
 
         public static List<DocurioMove> AllMoves(this DocurioState state) {
             List<DocurioMove> moves = new List<DocurioMove>();
+            if (state.win >= 0) {
+                return moves;
+            }
             DocurioEntity color = state.toPlay == 0 ? DocurioEntity.White : DocurioEntity.Black;
             for (int x = 0; x < state.xSize; x++) {
                 for (int y = 0; y < state.ySize; y++) {
@@ -52,6 +56,9 @@ namespace Assets.Code {
                 AddCompassMoves(state, moves, from, UNIT_PROPERTIES[DocurioEntity.King]);
             } else if ((piece & DocurioEntity.Pusher) > 0) {
                 AddCompassMoves(state, moves, from, UNIT_PROPERTIES[DocurioEntity.Pusher]);
+            } else if ((piece & DocurioEntity.Sniper) > 0) {
+                AddCompassMoves(state, moves, from, UNIT_PROPERTIES[DocurioEntity.Sniper]);
+                AddSniperMoves(state, moves, from, UNIT_PROPERTIES[DocurioEntity.Sniper]);
             } else {
                 throw new Exception("Could not find piece at " + from);
             }
@@ -64,10 +71,7 @@ namespace Assets.Code {
                 int lastZ = from.z;
                 int movesLeftInThisDirection = unitProperties.distance;
                 bool climbLeftInThisDirection = unitProperties.canClimb;
-                while (true) {
-                    if (x < 0 || x >= state.xSize || y < 0 || y >= state.ySize) {
-                        break;
-                    }
+                while (x >= 0 && x < state.xSize && y >= 0 && y < state.ySize) {
                     bool diagonal = direction.x != 0 && direction.y != 0;
                     int z = state.GroundZ(x, y);
                     
@@ -105,10 +109,10 @@ namespace Assets.Code {
                         // You can't descend and ascend in the same move.
                         climbLeftInThisDirection = false;
                     }
-                    // Check for other pieces in the space.
+                    // Check for a piece in the space.
                     Int3 space = new Int3(x, y, z);
                     if (!state.Is(space, DocurioEntity.Empty)) {
-                        if ((state.Is(from, DocurioEntity.White) && state.Is(space, DocurioEntity.Black)) || (state.Is(from, DocurioEntity.Black) && state.Is(space, DocurioEntity.White))) {
+                        if (unitProperties.moveCapture && ((state.Is(from, DocurioEntity.White) && state.Is(space, DocurioEntity.Black)) || (state.Is(from, DocurioEntity.Black) && state.Is(space, DocurioEntity.White)))) {
                             // Capture.
                             moves.Add(new DocurioMove(from, space));
                         }
@@ -130,6 +134,40 @@ namespace Assets.Code {
                 }
             }
         }
+        public static void AddSniperMoves(DocurioState state, List<DocurioMove> moves, Int3 from, UnitProperties unitProperties) {
+            foreach (Int2 direction in unitProperties.diagonal ? CARDINALS_AND_ORDINALS : CARDINALS) {
+                int x = from.x + direction.x * (unitProperties.distance);
+                int y = from.y + direction.y * (unitProperties.distance);
+                int lastZ = -1;
+                while (x >= 0 && x < state.xSize && y >= 0 && y < state.ySize) {
+                    if (lastZ == -1) {
+                        lastZ = state.GroundZ(x, y);
+                        x += direction.x;
+                        y += direction.y;
+                        continue;
+                    }
+                    int z = state.GroundZ(x, y);
+                    if (z < lastZ) {
+                        // Units hiding behind cover.
+                        x += direction.x;
+                        y += direction.y;
+                        lastZ = z;
+                        continue;
+                    }
+                    // Check for a piece in the space.
+                    Int3 space = new Int3(x, y, z);
+                    if (!state.Is(space, DocurioEntity.Empty)) {
+                        if ((state.Is(from, DocurioEntity.White) && state.Is(space, DocurioEntity.Black)) || (state.Is(from, DocurioEntity.Black) && state.Is(space, DocurioEntity.White))) {
+                            // Snipe.
+                            moves.Add(new DocurioMove(from, space, Int2.Zero, true));
+                        }
+                    }
+                    x += direction.x;
+                    y += direction.y;
+                    lastZ = z;
+                }
+            }
+        }
     }
 
     public class UnitProperties {
@@ -137,5 +175,6 @@ namespace Assets.Code {
         public int distance = 99;
         public bool canClimb = true;
         public bool canPush = false;
+        public bool moveCapture = true;
     }
 }

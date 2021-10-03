@@ -8,13 +8,17 @@ public class EntityScript : MonoBehaviour
 {
     public Material blackMaterial;
     public MeshFilter meshFilter;
-    public GameObject prefabPusherAnim;
+    public GameObject prefabPusherAnim, prefabSniperAnim;
 
     Queue<UnitAnimation> animations = new Queue<UnitAnimation>();
 
     public void BecomePusher() {
         Destroy(meshFilter.gameObject);
         Instantiate(prefabPusherAnim, transform);
+    }
+    public void BecomeSniper() {
+        Destroy(meshFilter.gameObject);
+        Instantiate(prefabSniperAnim, transform);
     }
     public void BecomeBlack() {
         foreach (MeshRenderer mr in GetComponentsInChildren<MeshRenderer>()) {

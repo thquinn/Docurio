@@ -41,6 +41,9 @@ public class GameBoardScript : MonoBehaviour
                     } else if (state.Is(x, y, z, DocurioEntity.Pusher)) {
                         entity = Instantiate(unitPrefab, transform);
                         entity.GetComponent<EntityScript>().BecomePusher();
+                    } else if (state.Is(x, y, z, DocurioEntity.Sniper)) {
+                        entity = Instantiate(unitPrefab, transform);
+                        entity.GetComponent<EntityScript>().BecomeSniper();
                     } else {
                         throw new Exception("Unknown piece type.");
                     }
@@ -87,7 +90,7 @@ public class GameBoardScript : MonoBehaviour
             }
         }
         return false;
-    }
+    } 
 
     bool UpdateSelectMove() {
         if (!Input.GetMouseButtonDown(0)) {
@@ -111,7 +114,7 @@ public class GameBoardScript : MonoBehaviour
             entityScripts[d.x, d.y, d.z] = null;
         }
         EntityScript unitScript = entityScripts[move.from.x, move.from.y, move.from.z];
-        if (move.from != move.to) {
+        if (!move.snipe && move.from != move.to) {
             entityScripts[move.to.x, move.to.y, move.to.z] = unitScript;
             entityScripts[move.from.x, move.from.y, move.from.z] = null;
             unitScript.AnimateLinearMove(state, move);
@@ -123,7 +126,9 @@ public class GameBoardScript : MonoBehaviour
             entityScripts[slide.Item1.x, slide.Item1.y, slide.Item1.z] = null;
             scriptToSlide.Add(slidScript, slide);
         }
-        unitScript.AnimatePushes(move.to, scriptToSlide);
+        if (scriptToSlide.Count > 0) {
+            unitScript.AnimatePushes(move.to, scriptToSlide);
+        }
     }
     void UpdateSelectUnit() {
         if (!Input.GetMouseButtonDown(0)) {
@@ -150,6 +155,9 @@ public class GameBoardScript : MonoBehaviour
                 selectMoveObjects[selectBlock.GetComponentInChildren<Collider>()] = move;
             } else {
                 GameObject selectTile = Instantiate(selectTilePrefab, transform);
+                if (!state.Is(move.to, DocurioEntity.Empty)) {
+                    selectTile.GetComponent<SelectTileScript>().CaptureColor();
+                }
                 selectTile.transform.localPosition = new Vector3(move.to.x, move.to.z * entityHeight, move.to.y);
                 selectMoveObjects[selectTile.GetComponent<Collider>()] = move;
             }
