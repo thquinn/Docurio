@@ -54,7 +54,7 @@ public class UnitTooltipScript : MonoBehaviour
         } else if ((unit & DocurioEntity.Sniper) != 0) {
             tmp.text = "<size=50>Sniper</size>\nTeleports up to two squares without capturing. Can shoot distant enemies in a straight line.";
         } else if ((unit & DocurioEntity.Bystander) != 0) {
-            tmp.text = "<size=50>Peon</size>\nMoves one square in a cardinal direction. Can't capture.";
+            tmp.text = "<size=50>Peon</size>\nMoves one square in any direction. Can't capture.";
         }
     }
 }

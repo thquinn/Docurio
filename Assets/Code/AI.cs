@@ -81,6 +81,9 @@ namespace Assets.Code {
                 currentNode.rollouts++;
                 if (currentState.win == currentNode.parent.toPlay) {
                     currentNode.totalReward++;
+                } else {
+                    // Encourage a losing AI to draw the game out as long as possible.
+                    currentNode.totalReward += Math.Min(.5, (currentState.moves - rootState.moves) *.02);
                 }
                 currentNode = currentNode.parent;
             }
@@ -97,7 +100,7 @@ namespace Assets.Code {
         int expandedChildrenCount;
         public int toPlay;
         public int rollouts;
-        public float totalReward;
+        public double totalReward;
 
         public MCTSNode(MCTSNode parent, DocurioState state) {
             this.parent = parent;

@@ -21,7 +21,7 @@ public class GameBoardScript : MonoBehaviour
     public void Init(LevelInfo levelInfo) {
         this.levelInfo = levelInfo;
         state = new DocurioState(levelInfo.layout);
-        transform.localPosition = new Vector3((state.xSize - 1) / -2f, 0, (state.ySize - 1) / -2f);
+        transform.localPosition = new Vector3((state.xSize - 1) / -2f, 5, (state.ySize - 1) / -2f);
         tileObjects = new GameObject[state.xSize, state.ySize];
         entityScripts = new EntityScript[state.xSize, state.ySize, state.zSize];
         entityHeight = blockPrefab.transform.localScale.y;
@@ -65,6 +65,9 @@ public class GameBoardScript : MonoBehaviour
     }
 
     void Update() {
+        Vector3 localPosition = transform.localPosition;
+        localPosition.y = Mathf.Lerp(localPosition.y, 0, .1f);
+        transform.localPosition = localPosition;
         if (state.win > -1) {
             return;
         }
@@ -80,9 +83,6 @@ public class GameBoardScript : MonoBehaviour
                 aiIndicator.Destroy();
                 aiIndicator = null;
             }
-            return;
-        }
-        if (IsAnimating()) {
             return;
         }
         if (!UpdateSelectMove()) {

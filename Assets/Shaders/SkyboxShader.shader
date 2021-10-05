@@ -69,12 +69,13 @@
                                          fixed4(.35, .4, .3, 1),
                                          fixed4(.55, .6, .8, 1),
                                          fixed4(1, 1, 1, 1),
-                                         _Time.x + 200);
+                                         _Time.x * 2 + 400);
                 float mx = abs((abs(i.vec.x) % .1) - .05);
                 float my = abs((abs(i.vec.y) % .1) - .05);
                 float mz = abs((abs(i.vec.z) % .1) - .05);
                 float d = mx * .1 + my * .1 + mz * .1;
-                return col - d;
+                col -= d;
+                return col;
             }
             ENDCG
         }

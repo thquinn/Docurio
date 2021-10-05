@@ -10,9 +10,9 @@ namespace Assets.Code {
         static Int2[] CARDINALS = new Int2[] { new Int2(-1, 0), new Int2(1, 0), new Int2(0, -1), new Int2(0, 1) };
         static Int2[] CARDINALS_AND_ORDINALS = new Int2[] { new Int2(-1, -1), new Int2(-1, 0), new Int2(-1, 1), new Int2(0, -1), new Int2(0, 1), new Int2(1, -1), new Int2(1, 0), new Int2(1, 1) };
         static Dictionary<DocurioEntity, UnitProperties> UNIT_PROPERTIES = new Dictionary<DocurioEntity, UnitProperties>{
-            { DocurioEntity.King, new UnitProperties(){ diagonal = true, distance = 1, canClimb = false } },
-            { DocurioEntity.Pusher, new UnitProperties(){ canPush = true } },
-            { DocurioEntity.Sniper, new UnitProperties(){ diagonal = true, distance = 2, moveCapture = false } },
+            { DocurioEntity.King, new UnitProperties(){ distance = 1, canClimb = false } },
+            { DocurioEntity.Pusher, new UnitProperties(){ diagonal = false, canPush = true } },
+            { DocurioEntity.Sniper, new UnitProperties(){ distance = 2, moveCapture = false } },
             { DocurioEntity.Bystander, new UnitProperties(){ distance = 1, moveCapture = false } },
         };
 
@@ -187,7 +187,7 @@ namespace Assets.Code {
     }
 
     public class UnitProperties {
-        public bool diagonal = false;
+        public bool diagonal = true;
         public int distance = 99;
         public bool canClimb = true;
         public bool canPush = false;

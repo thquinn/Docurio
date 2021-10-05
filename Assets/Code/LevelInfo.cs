@@ -6,6 +6,10 @@ using System.Threading.Tasks;
 
 namespace Assets.Code {
     public class LevelInfo {
+        public static HashSet<string> NON_AI_CENTRIC_LEVELS = new HashSet<string>() {
+            "Bridge"
+        };
+
         public int index;
         public LevelDifficulty difficulty;
         public string layout;

@@ -638,6 +638,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: Standard
       objectReference: {fileID: 0}
+    - target: {fileID: 7904121960202918915, guid: 36adc5f12b0db3844aa8271e5cf760ef,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 7904121961164427512, guid: 36adc5f12b0db3844aa8271e5cf760ef,
         type: 3}
       propertyPath: m_Sprite
@@ -790,6 +795,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: Hard
+      objectReference: {fileID: 0}
+    - target: {fileID: 7904121960202918915, guid: 36adc5f12b0db3844aa8271e5cf760ef,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7904121961164427512, guid: 36adc5f12b0db3844aa8271e5cf760ef,
         type: 3}
